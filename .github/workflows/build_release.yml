@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  VERSION: 1.20.4
+  VERSION: 1.20.41
 
 jobs:
   build_and_release_windows:
@@ -106,9 +106,9 @@ jobs:
       - name: Create tar.xz archive for Linux
         run: |
             cd dist
-            tar -cf overviewer-${{ env.VERSION }}-linux.tar overviewer
-            xz -z overviewer-${{ env.VERSION }}-linux.tar
-            mv overviewer-${{ env.VERSION }}-linux.tar.xz ../overviewer-${{ env.VERSION }}-linux.tar.xz
+            tar -cf overviewer-${{ env.VERSION }}-LINUX.tar overviewer
+            xz -z overviewer-${{ env.VERSION }}-LINUX.tar
+            mv overviewer-${{ env.VERSION }}-LINUX.tar.xz ../overviewer-${{ env.VERSION }}-LINUX.tar.xz
 
       - name: Get upload URL
         run: 'echo "Upload URL: ${{ needs.build_and_release_windows.outputs.upload_url }}"'
@@ -120,50 +120,6 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.build_and_release_windows.outputs.upload_url }}
-          asset_path: ./overviewer-${{ env.VERSION }}-linux.tar.xz
-          asset_name: overviewer-${{ env.VERSION }}-linux.tar.xz
+          asset_path: ./overviewer-${{ env.VERSION }}-LINUX.tar.xz
+          asset_name: overviewer-${{ env.VERSION }}-LINUX.tar.xz
           asset_content_type: application/x-xz
-
-  run_on_arch:
-    runs-on: ubuntu-22.04
-    needs: build_and_release_windows
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    name: Build on all architectures
-    strategy:
-      matrix:
-        include:
-          - arch: armv6
-          - arch: armv7
-          - arch: aarch64
-          - arch: riscv64
-          - arch: s390x
-          - arch: ppc64le
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Run on Arch
-        uses: uraimo/run-on-arch-action@v2
-        with:
-          arch: ${{ matrix.arch }}
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          run: |
-            uname -a
-            echo "Running on ${{ matrix.arch }}"
-            sudo DEBIAN_FRONTEND=noninteractive apt-get -y install zlib1g-dev libjpeg-dev devscripts python3-all-dev debhelper python3-pil python3-numpy dh-python
-            python -m pip install numpy Pillow==10.2.0
-            git clone --branch=10.2.0 --depth=1 https://github.com/python-pillow/Pillow.git /tmp/pillow_checkout
-            env PIL_INCLUDE_DIR=/tmp/pillow_checkout/src/libImaging/ python setup.py build
-            env DEB_BUILD_OPTIONS=nocheck debuild -i -us -uc -b -Zxz
-            ls -l ../*.deb
-
-      - name: Upload Release Asset
-        id: upload_release_asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.build_and_release_windows.outputs.upload_url  }}
-          asset_path: ../*.deb
-          asset_name: overviewer-${{env.VERSION}}-${{ matrix.arch }}.deb
-          asset_content_type: application/octet-stream
-
