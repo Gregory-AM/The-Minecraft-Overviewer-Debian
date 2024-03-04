@@ -128,7 +128,7 @@ jobs:
   build_and_release_debian:
     runs-on: ubuntu-22.04
     needs: build_and_release_windows
-    if: github.event.name == 'push' && github.ref == 'refs/head/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code
