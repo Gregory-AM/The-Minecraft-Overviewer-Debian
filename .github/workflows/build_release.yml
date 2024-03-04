@@ -46,6 +46,12 @@ jobs:
         run: |
           Compress-Archive -Path .\dist\overviewer -DestinationPath overviewer-${{ env.VERSION }}-windows.zip
 
+      - name: Create Release Notes
+        uses: johnyherangi/create-release-notes@main
+        id: create-release-notes
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Create Release for Windows
         id: create_release_windows
         uses: actions/create-release@v1
@@ -54,8 +60,7 @@ jobs:
         with:
           tag_name: ${{ env.VERSION }}
           release_name: Release v${{ env.VERSION }}
-          body: |
-            Created using [The Minecraft Overviewer v1.20.4](https://github.com/GregoryAM-SP/The-Minecraft-Overviewer/releases/tag/v1.20.4)
+          body: ${{ steps.create-release-notes.outputs.release-notes }}
           draft: false
           prerelease: false
 
@@ -125,7 +130,7 @@ jobs:
           asset_name: overviewer-v${{ env.VERSION }}-LINUX.tar.xz
           asset_content_type: application/x-xz
 
-  build_and_release_debian:
+  build_and_release_debian_x86_64:
     runs-on: ubuntu-22.04
     needs: build_and_release_windows
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
