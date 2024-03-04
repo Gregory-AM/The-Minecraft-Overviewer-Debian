@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  VERSION: 1.20.45
+  VERSION: 1.20.46
 
 jobs:
   build_and_release_windows:
@@ -166,7 +166,7 @@ jobs:
         run: ls -l ../*.deb
 
       - name: Get upload URL
-        run: 'echo "Upload URL: ${{ needs.build_and_release_windows.outputs.upload_url }}'
+        run: 'echo "Upload URL: ${{ needs.build_and_release_windows.outputs.upload_url }}"'
 
       - name: Upload Debian Package Release Asset
         id: upload_debian_package
