@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  VERSION: 1.20.41
+  VERSION: 1.20.42
 
 jobs:
   build_and_release_windows:
@@ -100,6 +100,7 @@ jobs:
               
       - name: Build project for Linux
         run: |
+            uname -m
             python setup.py build
             pyinstaller overviewer.spec
               
