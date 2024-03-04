@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  VERSION: 1.20.46
+  VERSION: 1.20.47
 
 jobs:
   build_and_release_windows:
@@ -175,7 +175,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ needs.build_and_release_windows.outputs.upload_url }}
-            asset_path: ../*.deb
+            asset_path: ../the-minecraft-overviewer_1.20.46-0_amd64.deb
             asset_name: overviewer-${{ env.VERSION }}-x86_64.deb
             asset_content_type: application/x-deb
 
