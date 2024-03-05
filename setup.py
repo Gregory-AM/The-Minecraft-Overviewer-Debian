@@ -149,14 +149,22 @@ if py2app is not None:
 #
 # script, package, and data
 #
-
 setup_kwargs['packages'] = ['overviewer_core', 'overviewer_core/aux_files']
-setup_kwargs['scripts'] = ['overviewer.py']
 setup_kwargs['package_data'] = {'overviewer_core': recursive_package_data('data/textures') + recursive_package_data('data/web_assets') + recursive_package_data('data/js_src')}
 
-if py2exe is None:
-    setup_kwargs['data_files'] = [('share/doc/minecraft-overviewer', doc_files)]
+if os.name == 'nt':  # Checking if the operating system is Windows
+    setup_kwargs['scripts'] = ['overviewer.py']
+    # Rename the file if it exists
+    if os.path.exists('overviewer'):
+        os.rename('overviewer', 'overviewer.py')
+elif os.name == 'posix':  # Checking if the operating system is Linux
+    setup_kwargs['scripts'] = ['overviewer']
+    # Rename the file if it exists
+    if os.path.exists('overviewer.py'):
+        os.rename('overviewer.py', 'overviewer')
 
+if py2exe is None:
+    setup_kwargs['data_files'] = [('share/doc/the-minecraft-overviewer', doc_files)]
 
 #
 # c_overviewer extension

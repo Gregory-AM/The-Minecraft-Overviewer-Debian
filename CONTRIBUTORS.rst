@@ -34,6 +34,7 @@ for many different parts of the code.
  * Michael Writhe <michael@writhem.com>
  * Xon <Xon@localhost>
  * Nicolas Frattaroli <ovdev@fratti.ch>
+ * Gregory Meadows <the.minecraft.overviewer@gmail.com>
 
 ------------------------
 Short-term Contributions
