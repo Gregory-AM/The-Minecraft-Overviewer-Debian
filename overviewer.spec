@@ -10,7 +10,13 @@ def get_overviewer_pkgname():
     from overviewer_core import overviewer_version
     return "overviewer-" + overviewer_version.VERSION
 
-a = Analysis(['overviewer.py'],
+# Define the entry point based on the platform
+if sys.platform.startswith('win'):
+    entry_point = ['overviewer.py']
+else:
+    entry_point = ['overviewer']
+
+a = Analysis(entry_point,
              binaries=None,
              datas=[("overviewer_core/data", "overviewer_core/data")],
              hiddenimports=[
