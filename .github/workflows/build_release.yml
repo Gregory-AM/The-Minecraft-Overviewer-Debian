@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  VERSION: 1.20.49
+  VERSION: 1.20.410
 
 jobs:
   build_and_release_windows:
@@ -45,7 +45,6 @@ jobs:
       - name: Create ZIP file for Windows
         run: |
           Compress-Archive -Path .\dist\overviewer -DestinationPath overviewer-${{ env.VERSION }}-windows.zip
-
       - name: Create Release Notes
         uses: johnyherangi/create-release-notes@main
         id: create-release-notes
@@ -115,7 +114,6 @@ jobs:
             tar -cf overviewer-${{ env.VERSION }}-LINUX.tar overviewer
             xz -z overviewer-${{ env.VERSION }}-LINUX.tar
             mv overviewer-${{ env.VERSION }}-LINUX.tar.xz ../overviewer-${{ env.VERSION }}-LINUX.tar.xz
-
       - name: Get upload URL
         run: 'echo "Upload URL: ${{ needs.build_and_release_windows.outputs.upload_url }}"'
               
@@ -129,12 +127,9 @@ jobs:
           asset_path: ./overviewer-${{ env.VERSION }}-LINUX.tar.xz
           asset_name: overviewer-v${{ env.VERSION }}-LINUX.tar.xz
           asset_content_type: application/x-xz
-        
-  build_and_release_debian_x86_64:
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, ubuntu-20.04]
-    runs-on: ${{ matrix.os }}
+
+  build_and_release_debian_22_04:
+    runs-on: ubuntu-22.04
     needs: build_and_release_windows
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
@@ -166,7 +161,6 @@ jobs:
           export VERSION=$(python3 setup.py --version)
           export DATE=$(date -u +'%a, %d %b %Y %H:%M:%S %z')
           envsubst < debian/changelog.in > debian/changelog
-
       - name: Build .deb package
         run: env DEB_BUILD_OPTIONS=nocheck debuild -i -us -uc -b -Zxz
 
@@ -184,6 +178,58 @@ jobs:
         with:
             upload_url: ${{ needs.build_and_release_windows.outputs.upload_url }}
             asset_path: ../the-minecraft-overviewer_${{ env.VERSION }}-0_amd64.deb
-            asset_name: overviewer-v${{ env.VERSION }}-x86_64-${{ matrix.os }}.deb
+            asset_name: overviewer-v${{ env.VERSION }}-x86_64-Ubuntu-22.04.deb
             asset_content_type: application/x-deb
 
+  build_and_release_debian_20_04:
+    runs-on: ubuntu-20.04
+    needs: build_and_release_windows
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+            fetch-depth: 0
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+            python-version: 3.8
+            
+      - name: Install Dependencies (apt)
+        run: sudo DEBIAN_FRONTEND=noninteractive apt-get -y install zlib1g-dev libjpeg-dev devscripts python3-all-dev debhelper python3-pil python3-numpy dh-python
+
+      - name: Install Dependencies (pip)
+        run: pip install -r requirements.txt
+
+      - name: Clone Pillow 10.2.0
+        run: git clone --branch=10.2.0 --depth=1 https://github.com/python-pillow/Pillow.git /tmp/pillow_checkout
+
+      - name: Build Extension
+        run: env PIL_INCLUDE_DIR=/tmp/pillow_checkout/src/libImaging/ python setup.py build
+
+      - name: Create .deb changelog
+        run: |
+          export VERSION=$(python3 setup.py --version)
+          export DATE=$(date -u +'%a, %d %b %Y %H:%M:%S %z')
+          envsubst < debian/changelog.in > debian/changelog
+      - name: Build .deb package
+        run: env DEB_BUILD_OPTIONS=nocheck debuild -i -us -uc -b -Zxz
+
+      - name: List Debian Packages
+        run: ls -l ../*.deb
+
+      - name: Get upload URL
+        run: 'echo "Upload URL: ${{ needs.build_and_release_windows.outputs.upload_url }}"'
+
+      - name: Upload Debian Package Release Asset
+        id: upload_debian_package
+        uses: actions/upload-release-asset@v1
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ needs.build_and_release_windows.outputs.upload_url }}
+            asset_path: ../the-minecraft-overviewer_${{ env.VERSION }}-0_amd64.deb
+            asset_name: overviewer-v${{ env.VERSION }}-x86_64-Ubuntu-20.04.deb
+            asset_content_type: application/x-deb
