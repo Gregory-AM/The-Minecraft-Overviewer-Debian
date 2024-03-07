@@ -129,9 +129,12 @@ jobs:
           asset_path: ./overviewer-${{ env.VERSION }}-LINUX.tar.xz
           asset_name: overviewer-v${{ env.VERSION }}-LINUX.tar.xz
           asset_content_type: application/x-xz
-
+        
   build_and_release_debian_x86_64:
-    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-20.04]
+    runs-on: ${{ matrix.os }}
     needs: build_and_release_windows
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
@@ -181,6 +184,6 @@ jobs:
         with:
             upload_url: ${{ needs.build_and_release_windows.outputs.upload_url }}
             asset_path: ../the-minecraft-overviewer_${{ env.VERSION }}-0_amd64.deb
-            asset_name: overviewer-v${{ env.VERSION }}-x86_64.deb
+            asset_name: overviewer-v${{ env.VERSION }}-x86_64-${{ matrix.os }}.deb
             asset_content_type: application/x-deb
 
