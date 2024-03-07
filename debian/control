@@ -10,6 +10,9 @@ Architecture: any
 Homepage: https://github.com/GregoryAM-SP/The-Minecraft-Overviewer
 X-Python3-Version: >= 3.4 
 Depends: ${misc:Depends}, ${python3:Depends}, python3-pil, python3-numpy, ${shlibs:Depends}
+Replaces: overviewer
+Provides: overviewer
+Breaks: overviewer
 Description: Command-line Interface (CLI)
   Rendering high-resolution maps of Minecraft Java Edition worlds.
   Generates a set of static HTML and image files and uses LeafletJS to display a nice interactive map.
