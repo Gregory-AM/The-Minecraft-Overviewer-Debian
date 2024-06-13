@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  VERSION: 1.20.412
+  VERSION: 1.20.413
 
 jobs:
   build_and_release_windows:
